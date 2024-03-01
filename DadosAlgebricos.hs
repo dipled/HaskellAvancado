@@ -56,15 +56,23 @@ tamanho Nil = 0
 tamanho (Cons a l) = 1 + tamanho l
 
 data Arvore a = Folha | No a (Arvore a) (Arvore a)
+    deriving Show
 
-insere :: Ord a => Eq a => a -> Arvore a -> Arvore a
-insere n Folha = No n Folha Folha
-insere n a@(No x e d) --Esse @ indica que a é equivalente a (No x e d)
-    | n > x = No x e (insere n d)
-    | n < x = No x (insere n e) d
+ins :: Ord a => a -> Arvore a -> Arvore a
+ins n Folha = No n Folha Folha
+ins n a@(No x e d) --Esse @ indica que a é equivalente a (No x e d)
+    | n > x = No x e (ins n d)
+    | n < x = No x (ins n e) d
     | otherwise = a
 
 
 altura :: Ord b => Num b => Arvore a -> b
 altura Folha = 0
 altura (No a e d) = 1 + max (altura e) (altura d)
+
+--Exercicio: funcao que recebe uma arvore e retorna uma lista ordenada 
+
+arvoreParaLista :: Arvore a -> [a]
+arvoreParaLista Folha = []
+arvoreParaLista (No a e d) = arvoreParaLista e ++ [a] ++ arvoreParaLista d
+
