@@ -36,6 +36,7 @@ removeNode e n@(Node x l r)
   |e < x = Node x (removeNode e l) r
   |e == x = Node x' (removeNode x' l) r where Node x' l' r' = greatestNode l
 
+--escolhi substituir a raiz pelo maior dos menores
 greatestNode :: Tree a -> Tree a
 greatestNode Leaf = Leaf
 greatestNode n@(Node x l r) = 
