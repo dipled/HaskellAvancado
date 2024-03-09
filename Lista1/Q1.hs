@@ -1,5 +1,8 @@
 {-# Language UnicodeSyntax #-}
 
+module Q1 where
+
+
 data Tree a = Node a (Tree a) (Tree a) | Leaf 
   deriving (Show)
 
@@ -7,8 +10,6 @@ inOrder :: Tree a -> [a]
 inOrder Leaf = []
 inOrder (Node a e d) = inOrder e ++ [a] ++ inOrder d
 
-testTree :: (Num a) => Tree a
-testTree = Node 21 (Node 14 (Node 10 (Node 5 Leaf Leaf) (Node 13 (Node 12 (Node 11 Leaf Leaf) Leaf) Leaf)) (Node 18 (Node 15 Leaf Leaf) (Node 19 Leaf Leaf))) (Node 28 (Node 25 Leaf Leaf) Leaf)
 
 insertNode :: (Ord a) => a -> Tree a -> Tree a
 insertNode e Leaf = Node e Leaf Leaf
@@ -45,3 +46,8 @@ greatestNode n@(Node x l r) =
     Node χ λ ρ -> greatestNode r 
 
 
+main :: IO()
+main = 
+  do
+    let testTree = Node 21 (Node 14 (Node 10 (Node 5 Leaf Leaf) (Node 13 (Node 12 (Node 11 Leaf Leaf) Leaf) Leaf)) (Node 18 (Node 15 Leaf Leaf) (Node 19 Leaf Leaf))) (Node 28 (Node 25 Leaf Leaf) Leaf)
+    print (removeNode 14 testTree)
