@@ -32,5 +32,5 @@ insertNode e a = rootColor(rot (insertNode' e a))
 main :: IO()
 main =
   do
-    let a = insertNode 9 (insertNode 10 (insertNode 13 (insertNode 12 (insertNode 11 Leaf))))
-    print a
+    let testTree = insertNode 9 (insertNode 10 (insertNode 13 (insertNode 12 (insertNode 11 Leaf))))
+    print testTree
