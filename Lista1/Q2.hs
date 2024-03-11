@@ -11,7 +11,7 @@ rot :: RBTree a -> RBTree a
 rot (Node x B a (Node y R b (Node z R c d))) = Node y R (Node x B a b) (Node z B c d)
 rot (Node z B (Node y R (Node x R a b) c) d) = Node y R (Node x B a b) (Node z B c d)
 rot (Node z B (Node x R a (Node y R b c)) d) = Node y R (Node x B a b) (Node z B c d)
-rot (Node z B a (Node y R (Node x R b c) d)) = Node y R (Node x B a b) (Node z B c d)
+rot (Node x B a (Node z R (Node y R b c) d)) = Node y R (Node x B a b) (Node z B c d)
 rot n = n
 
 rootColor :: RBTree a -> RBTree a
