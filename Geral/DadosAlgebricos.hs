@@ -1,5 +1,8 @@
+{-# LANGUAGE GADTs#-}
+
 data Semana = Dom | Seg | Ter | Qua | Qui | Sex | Sab
-  deriving (Show, Eq, Ord) -- Fala pro compilador gerar automaticamente uma definição da classe Show, Eq, Ord para o tipo de dado
+  deriving (Show, Eq, Ord) -- Fala pro compilador gerar automaticamente uma definição da classe Show, Eq, Ord 
+                           -- para o tipo de dado
 
 proximo :: Semana -> Semana
 proximo Seg = Ter
@@ -71,3 +74,58 @@ inOrder :: Arvore a -> [a]
 inOrder Folha = []
 inOrder (No a e d) = inOrder e ++ [a] ++ inOrder d
 
+
+
+-- data TermI = Lit Int | Succ TermI
+--     deriving(Show)
+-- 
+-- data TermB = LitB Bool | IsZero TermI
+--     deriving(Show)
+-- 
+-- data Term = If TermB Term Term | TB TermB | TI TermI
+--     deriving(Show)
+-- 
+-- evalI :: TermI -> Int
+-- evalI (Lit i) = i
+-- evalI (Succ t) = 1 + evalI t
+-- 
+-- evalB :: TermB -> Bool
+-- evalB (LitB b) = b
+-- evalB (IsZero t) = 0 == evalI t
+-- 
+-- 
+-- eval :: Term -> Term -- um lixo n faz o que a gente quer, entao o sei la quem fodao de haskell apresentou um negócio doidera:
+-- eval (If b t1 t2)    --                                                                         Dados algébricos generalizado
+--   | evalB b = t1
+--   | otherwise = t2
+
+
+-- Exemplos de GADTs
+
+data Term a where
+  Lit :: Int -> Term Int
+  LitB :: Bool -> Term Bool 
+  Succ :: Term Int -> Term Int
+  IsZero :: Term Int -> Term Bool
+  If :: Term Bool -> Term a -> Term a -> Term a
+  
+deriving instance Show a => Show (Term a)
+
+eval :: Term a -> a
+eval (Lit i) = i
+eval (LitB b) = b
+eval (Succ i) = 1 + eval i
+eval (IsZero b) = 0 == eval b
+eval (If b t1 t2)
+  | eval b = eval t1
+  | otherwise = eval t2
+
+
+data R
+data B
+data RBTree a c where
+  Leaf :: RBTree a B
+  Red :: a -> RBTree a B -> RBTree a B -> RBTree a R
+  Black :: a -> RBTree a c -> RBTree a c -> RBTree a B
+
+deriving instance Show a => Show (RBTree a c)
