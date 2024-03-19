@@ -14,20 +14,20 @@ instance Show SigBin where
   show (Pos n) = show n
 
 instance Num SigBin where
-  a + b = integerToBin ((sigBinToInteger a) + (sigBinToInteger b))
-  a - b = integerToBin ((sigBinToInteger a) - (sigBinToInteger b))
-  a * b = integerToBin ((sigBinToInteger a) * (sigBinToInteger b))
+  a + b = integerToBin (sigBinToInteger a + sigBinToInteger b)
+  a - b = integerToBin (sigBinToInteger a - sigBinToInteger b)
+  a * b = integerToBin (sigBinToInteger a * sigBinToInteger b)
   abs (Neg a) = Pos a
   abs (Pos a) = Pos a
 
-  signum (Neg V) = (Pos V)
-  signum (Pos V) = (Pos V)
-  signum (Neg (Z V)) = (Pos (Z V))
-  signum (Pos (Z V)) = (Pos (Z V))
-  signum (Neg a) = (Neg (U V))
-  signum (Pos a) = (Pos (U V))
+  signum (Neg V) = Pos V
+  signum (Pos V) = Pos V
+  signum (Neg (Z V)) = Pos (Z V)
+  signum (Pos (Z V)) = Pos (Z V)
+  signum (Neg a) = Neg (U V)
+  signum (Pos a) = Pos (U V)
 
-  fromInteger a = integerToBin a
+  fromInteger  = integerToBin 
 
 binLen :: Bin -> Int
 binLen V = 0
@@ -45,7 +45,7 @@ sigBinToInteger (Pos n) = binToInteger n
 sigBinToInteger (Neg n) = binToInteger n * (-1)
 
 binToInteger :: Bin -> Integer
-binToInteger n = binToIntegerAux n ((binLen n) - 1)
+binToInteger n = binToIntegerAux n (binLen n - 1)
 
 binToIntegerAux :: Bin -> Int -> Integer
 binToIntegerAux V len = 0
