@@ -13,6 +13,22 @@ instance Show SigBin where
   show (Neg n) = "-" ++ show n
   show (Pos n) = "+" ++ show n
 
+instance Num SigBin where
+  a + b = integerToBin ((sigBinToInteger a) + (sigBinToInteger b))
+  a - b = integerToBin ((sigBinToInteger a) - (sigBinToInteger b))
+  a * b = integerToBin ((sigBinToInteger a) * (sigBinToInteger b))
+  abs (Neg a) = Pos a
+  abs (Pos a) = Pos a
+
+  signum (Neg V) = (Pos V)
+  signum (Pos V) = (Pos V)
+  signum (Neg (Z V)) = (Pos (Z V))
+  signum (Pos (Z V)) = (Pos (Z V))
+  signum (Neg a) = (Neg (U V))
+  signum (Pos a) = (Pos (U V))
+
+  fromInteger a = integerToBin a
+
 binConcat :: Bin -> Bin -> Bin
 binConcat b1 V = V
 binConcat V b2 = b2
@@ -41,23 +57,3 @@ integerToBinAux :: Integer -> Bin
 integerToBinAux n 
   | mod n 2 == 0 = if n /= 0 then binConcat (integerToBinAux (div n 2)) (Z V)  else V
   | otherwise = binConcat (integerToBinAux (div n 2)) (U V)
-
-stringToBin "" = V
-stringToBin (x:xs) 
-    | x == '0' = Z (stringToBin xs)
-    | x == '1' = U (stringToBin xs)
-instance Num SigBin where
-  a + b = integerToBin ((sigBinToInteger a) + (sigBinToInteger b))
-  a - b = integerToBin ((sigBinToInteger a) - (sigBinToInteger b))
-  a * b = integerToBin ((sigBinToInteger a) * (sigBinToInteger b))
-  abs (Neg a) = Pos a
-  abs (Pos a) = Pos a
-
-  signum (Neg V) = (Pos V)
-  signum (Pos V) = (Pos V)
-  signum (Neg (Z V)) = (Pos (Z V))
-  signum (Pos (Z V)) = (Pos (Z V))
-  signum (Neg a) = (Neg (U V))
-  signum (Pos a) = (Pos (U V))
-
-  fromInteger a = integerToBin a
