@@ -11,7 +11,7 @@ instance Show SigBin where
   show (Neg V) = ""
   show (Pos V) = ""
   show (Neg n) = "-" ++ show n
-  show (Pos n) = "+" ++ show n
+  show (Pos n) = show n
 
 instance Num SigBin where
   a + b = integerToBin ((sigBinToInteger a) + (sigBinToInteger b))
@@ -29,6 +29,11 @@ instance Num SigBin where
 
   fromInteger a = integerToBin a
 
+binLen :: Bin -> Int
+binLen V = 0
+binLen (U n) = 1 + binLen n
+binLen (Z n) = 1 + binLen n
+
 binConcat :: Bin -> Bin -> Bin
 binConcat b1 V = b1
 binConcat V b2 = b2
@@ -40,7 +45,7 @@ sigBinToInteger (Pos n) = binToInteger n
 sigBinToInteger (Neg n) = binToInteger n * (-1)
 
 binToInteger :: Bin -> Integer
-binToInteger n = binToIntegerAux n ((length (show n)) - 1)
+binToInteger n = binToIntegerAux n ((binLen n) - 1)
 
 binToIntegerAux :: Bin -> Int -> Integer
 binToIntegerAux V len = 0
