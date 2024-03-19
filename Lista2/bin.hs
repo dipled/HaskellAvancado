@@ -30,7 +30,7 @@ instance Num SigBin where
   fromInteger a = integerToBin a
 
 binConcat :: Bin -> Bin -> Bin
-binConcat b1 V = V
+binConcat b1 V = b1
 binConcat V b2 = b2
 binConcat (Z b1) b2 = Z (binConcat b1 b2)
 binConcat (U b1) b2 = U (binConcat b1 b2)
