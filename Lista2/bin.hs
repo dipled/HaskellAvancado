@@ -8,18 +8,27 @@ instance Show Bin where
   show (U n) = "1" ++ show n
 
 instance Show SigBin where
+  show :: SigBin -> String
   show (Neg V) = ""
   show (Pos V) = ""
   show (Neg n) = "-" ++ show n
   show (Pos n) = show n
 
 instance Num SigBin where
+  (+) :: SigBin -> SigBin -> SigBin
   a + b = integerToBin (sigBinToInteger a + sigBinToInteger b)
+
+  (-) :: SigBin -> SigBin -> SigBin
   a - b = integerToBin (sigBinToInteger a - sigBinToInteger b)
+
+  (*) :: SigBin -> SigBin -> SigBin
   a * b = integerToBin (sigBinToInteger a * sigBinToInteger b)
+
+  abs :: SigBin -> SigBin
   abs (Neg a) = Pos a
   abs (Pos a) = Pos a
 
+  signum :: SigBin -> SigBin
   signum (Neg V) = Pos V
   signum (Pos V) = Pos V
   signum (Neg (Z V)) = Pos (Z V)
@@ -27,6 +36,7 @@ instance Num SigBin where
   signum (Neg a) = Neg (U V)
   signum (Pos a) = Pos (U V)
 
+  fromInteger :: Integer -> SigBin
   fromInteger  = integerToBin 
 
 binLen :: Bin -> Int
