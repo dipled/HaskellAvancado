@@ -1,6 +1,13 @@
-data Bin = V | Z Bin | U Bin
+{-# LANGUAGE GADTSyntax#-}
 
-data SigBin = Neg Bin | Pos Bin
+data Bin where
+  V :: Bin
+  Z :: Bin -> Bin
+  U :: Bin -> Bin
+
+data SigBin where
+  Neg :: Bin -> SigBin
+  Pos :: Bin -> SigBin
 
 instance Show Bin where
   show V = ""
@@ -44,11 +51,11 @@ binLen V = 0
 binLen (U n) = 1 + binLen n
 binLen (Z n) = 1 + binLen n
 
-binConcat :: Bin -> Bin -> Bin
-binConcat b1 V = b1
-binConcat V b2 = b2
-binConcat (Z b1) b2 = Z (binConcat b1 b2)
-binConcat (U b1) b2 = U (binConcat b1 b2)
+(+++) :: Bin -> Bin -> Bin
+(+++) b1 V = b1
+(+++) V b2 = b2
+(+++) (Z b1) b2 = Z (b1 +++ b2)
+(+++) (U b1) b2 = U (b1 +++ b2)
 
 sigBinToInteger :: SigBin -> Integer
 sigBinToInteger (Pos n) = binToInteger n
@@ -70,5 +77,5 @@ integerToBin n
 
 integerToBinAux :: Integer -> Bin
 integerToBinAux n 
-  | mod n 2 == 0 = if n /= 0 then binConcat (integerToBinAux (div n 2)) (Z V)  else V
-  | otherwise = binConcat (integerToBinAux (div n 2)) (U V)
+  | mod n 2 == 0 = if n /= 0 then (integerToBinAux (div n 2)) +++ (Z V)  else V
+  | otherwise = (integerToBinAux (div n 2)) +++ (U V)
