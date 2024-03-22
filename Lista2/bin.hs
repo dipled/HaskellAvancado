@@ -52,10 +52,10 @@ binLen (U n) = 1 + binLen n
 binLen (Z n) = 1 + binLen n
 
 (+++) :: Bin -> Bin -> Bin
-(+++) b1 V = b1
-(+++) V b2 = b2
-(+++) (Z b1) b2 = Z (b1 +++ b2)
-(+++) (U b1) b2 = U (b1 +++ b2)
+b1 +++ V = b1
+V +++ b2 = b2
+(Z b1) +++ b2 = Z (b1 +++ b2)
+(U b1) +++ b2 = U (b1 +++ b2)
 
 sigBinToInteger :: SigBin -> Integer
 sigBinToInteger (Pos n) = binToInteger n
