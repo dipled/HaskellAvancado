@@ -1,6 +1,13 @@
-data Bin = V | Z Bin | U Bin
+{-# LANGUAGE GADTSyntax#-}
 
-data SigBin = Neg Bin | Pos Bin
+data Bin where
+  V :: Bin
+  Z :: Bin -> Bin
+  U :: Bin -> Bin
+
+data SigBin where
+  Neg :: Bin -> SigBin
+  Pos :: Bin -> SigBin
 
 instance Show Bin where
   show V = ""
@@ -8,44 +15,54 @@ instance Show Bin where
   show (U n) = "1" ++ show n
 
 instance Show SigBin where
+  show :: SigBin -> String
   show (Neg V) = ""
   show (Pos V) = ""
   show (Neg n) = "-" ++ show n
   show (Pos n) = show n
 
 instance Num SigBin where
-  a + b = integerToBin ((sigBinToInteger a) + (sigBinToInteger b))
-  a - b = integerToBin ((sigBinToInteger a) - (sigBinToInteger b))
-  a * b = integerToBin ((sigBinToInteger a) * (sigBinToInteger b))
+  (+) :: SigBin -> SigBin -> SigBin
+  a + b = integerToBin (sigBinToInteger a + sigBinToInteger b)
+
+  (-) :: SigBin -> SigBin -> SigBin
+  a - b = integerToBin (sigBinToInteger a - sigBinToInteger b)
+
+  (*) :: SigBin -> SigBin -> SigBin
+  a * b = integerToBin (sigBinToInteger a * sigBinToInteger b)
+
+  abs :: SigBin -> SigBin
   abs (Neg a) = Pos a
   abs (Pos a) = Pos a
 
-  signum (Neg V) = (Pos V)
-  signum (Pos V) = (Pos V)
-  signum (Neg (Z V)) = (Pos (Z V))
-  signum (Pos (Z V)) = (Pos (Z V))
-  signum (Neg a) = (Neg (U V))
-  signum (Pos a) = (Pos (U V))
+  signum :: SigBin -> SigBin
+  signum (Neg V) = Pos V
+  signum (Pos V) = Pos V
+  signum (Neg (Z V)) = Pos (Z V)
+  signum (Pos (Z V)) = Pos (Z V)
+  signum (Neg a) = Neg (U V)
+  signum (Pos a) = Pos (U V)
 
-  fromInteger a = integerToBin a
+  fromInteger :: Integer -> SigBin
+  fromInteger  = integerToBin 
 
 binLen :: Bin -> Int
 binLen V = 0
 binLen (U n) = 1 + binLen n
 binLen (Z n) = 1 + binLen n
 
-binConcat :: Bin -> Bin -> Bin
-binConcat b1 V = b1
-binConcat V b2 = b2
-binConcat (Z b1) b2 = Z (binConcat b1 b2)
-binConcat (U b1) b2 = U (binConcat b1 b2)
+(+++) :: Bin -> Bin -> Bin
+b1 +++ V = b1
+V +++ b2 = b2
+(Z b1) +++ b2 = Z (b1 +++ b2)
+(U b1) +++ b2 = U (b1 +++ b2)
 
 sigBinToInteger :: SigBin -> Integer
 sigBinToInteger (Pos n) = binToInteger n
 sigBinToInteger (Neg n) = binToInteger n * (-1)
 
 binToInteger :: Bin -> Integer
-binToInteger n = binToIntegerAux n ((binLen n) - 1)
+binToInteger n = binToIntegerAux n (binLen n - 1)
 
 binToIntegerAux :: Bin -> Int -> Integer
 binToIntegerAux V len = 0
@@ -60,9 +77,5 @@ integerToBin n
 
 integerToBinAux :: Integer -> Bin
 integerToBinAux n 
-  | mod n 2 == 0 = if n /= 0 then binConcat (integerToBinAux (div n 2)) (Z V)  else V
-  | otherwise = binConcat (integerToBinAux (div n 2)) (U V)
-
-
-
-
+  | mod n 2 == 0 = if n /= 0 then (integerToBinAux (div n 2)) +++ (Z V)  else V
+  | otherwise = (integerToBinAux (div n 2)) +++ (U V)
