@@ -129,3 +129,5 @@ data RBTree a c where
   Black :: a -> RBTree a c -> RBTree a c -> RBTree a B
 
 deriving instance Show a => Show (RBTree a c)
+
+

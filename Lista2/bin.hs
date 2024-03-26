@@ -62,3 +62,7 @@ integerToBinAux :: Integer -> Bin
 integerToBinAux n 
   | mod n 2 == 0 = if n /= 0 then binConcat (integerToBinAux (div n 2)) (Z V)  else V
   | otherwise = binConcat (integerToBinAux (div n 2)) (U V)
+
+
+
+
