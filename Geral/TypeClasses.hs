@@ -1,4 +1,4 @@
-{-# language FunctionalDependencies, GADTSyntax #-}
+{-# LANGUAGE FunctionalDependencies, GADTSyntax #-}
 
 {-
 
@@ -22,11 +22,24 @@ data TermB = LitB Bool | IsZero TermI
 data Term = If TermB Term Term | TB TermB | TI TermI
     deriving(Show)
 
+data Res = RI Int | RB Bool
+
 class Eval a b | a -> b where  -- essa dependência indica que a partir do tipo a, é possível
                                -- determinar o tipo b
     eval :: a -> b
 
+instance Eval TermI Int where
+  eval (Lit i) = i
+  eval (Succ t) = 1 + eval t
 
+instance Eval TermB Bool where
+  eval (LitB b) = b
+  eval (IsZero t) = 0 == eval t
+
+instance Eval Term Res where
+  eval (If b t1 t2) = if eval b then eval t1 else eval t2
+  eval (TB t) = RB (eval t)
+  eval (TI t) = RI (eval t)
 
 data Temperature  = C Float | F Float
     deriving(Show)
