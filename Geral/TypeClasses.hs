@@ -28,6 +28,55 @@ class Eval a b | a -> b where  -- essa dependência indica que a partir do tipo 
                                -- determinar o tipo b
     eval :: a -> b
 
+instance Num (Maybe Int) where
+  (+) :: Maybe Int -> Maybe Int -> Maybe Int
+  Nothing + _ = Nothing
+  _ + Nothing = Nothing
+  (Just a) + (Just b) = Just (a + b)
+
+  (-) :: Maybe Int -> Maybe Int -> Maybe Int
+  Nothing - _ = Nothing
+  _ - Nothing = Nothing
+  (Just a) - (Just b) = Just (a - b)
+
+  (*) :: Maybe Int -> Maybe Int -> Maybe Int
+  Nothing * _ = Nothing
+  _ * Nothing = Nothing
+  (Just a) * (Just b) = Just (a * b)
+
+  abs :: Maybe Int -> Maybe Int
+  abs Nothing = Nothing
+  abs (Just a)
+    | a >= 0 = Just a
+    | otherwise = Just a * (-1)
+
+  signum :: Maybe Int -> Maybe Int 
+  signum Nothing = Nothing
+  signum (Just a)
+    | a > 0 = Just 1
+    | a == 0 = Just 0
+    | otherwise = Just (-1)
+
+  fromInteger :: Integer -> Maybe Int
+  fromInteger a = Just (fromInteger a)
+
+(!) :: Maybe Int -> Maybe Int -> Maybe Int
+Nothing ! _ = Nothing
+_ ! Nothing = Nothing
+(Just a) ! (Just b)
+  | b == 0 = Nothing
+  | otherwise = Just (quot a b)
+
+(%) :: Maybe Int -> Maybe Int -> Maybe Int
+
+Nothing % _ = Nothing
+_ % Nothing = Nothing
+
+(Just a) % (Just b)
+  | b == 0 = Nothing
+  | otherwise = Just (a `rem` b)
+
+
 instance Eval TermI Int where
   eval (Lit i) = i
   eval (Succ t) = 1 + eval t

@@ -1,5 +1,8 @@
 {-# LANGUAGE GADTs#-}
 
+data Booleano = Verdadeiro | Falso
+
+
 data Semana = Dom | Seg | Ter | Qua | Qui | Sex | Sab
   deriving (Show, Eq, Ord) -- Fala pro compilador gerar automaticamente uma definição da classe Show, Eq, Ord 
                            -- para o tipo de dado
@@ -47,12 +50,12 @@ primeiro (Par a _) = a
 segundo :: Dupla a b -> b
 segundo (Par _ b) = b
 
-data Lista a = a :> (Lista a) | Nil
+data Lista a = Elemento a (Lista a) | Nil
   deriving (Show)
 
 tamanho :: (Num b) => Lista a -> b
 tamanho Nil = 0
-tamanho (a :> l) = 1 + tamanho l
+tamanho (Elemento a l) = 1 + tamanho l
 
 data Arvore a = Folha | No a (Arvore a) (Arvore a)
   deriving (Show)
