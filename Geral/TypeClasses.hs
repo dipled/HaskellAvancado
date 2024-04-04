@@ -90,7 +90,9 @@ instance Eval Term Res where
   eval (TB t) = RB (eval t)
   eval (TI t) = RI (eval t)
 
-data Temperature  = C Float | F Float
+data Temperature  where
+   C :: Float -> Temperature  
+   F :: Float -> Temperature
     deriving(Show)
 
 instance Eq Temperature where
