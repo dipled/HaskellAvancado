@@ -38,6 +38,7 @@ pegaNumero (Folha i c) = i
 pegaNumero (No i l r) = i
 
 construirArvore :: [Huffman] -> Huffman
+construirArvore [] = error "Arvore Vazia"
 construirArvore [x] = x
 construirArvore (x : y : xs) = construirArvore $  insert (No (pegaNumero x + pegaNumero y) x y) xs
 
@@ -49,12 +50,13 @@ codHuffman :: Huffman -> [(Char, String)]
 codHuffman = codHuffmanAux ""
 
 
-codificarAux :: String -> [(Char, String)] -> [[String]]
+codificarAux :: String -> [(Char, String)] -> [String]
 codificarAux [] _ = []
-codificarAux s@(x:xs) huffmanCode = map snd (filter ((x ==) . fst) huffmanCode) : codificarAux xs huffmanCode
+codificarAux s@(x:xs) huffmanCode = map snd (filter ((x ==) . fst) huffmanCode) ++ codificarAux xs huffmanCode
 
 codificar :: String -> Huffman -> String
-codificar s@(x:xs) h = concat $ concat $ codificarAux s $ codHuffman h
+codificar "" _ = ""
+codificar s@(x:xs) h = concat $ codificarAux s $ codHuffman h
 
 decodificarCaractere :: String -> Huffman -> (Char, String)
 decodificarCaractere s (Folha i c) = (c, s)
