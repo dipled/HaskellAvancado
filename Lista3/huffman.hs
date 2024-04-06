@@ -1,5 +1,14 @@
 {-# LANGUAGE GADTSyntax #-}
 
+import Data.Binary.Get qualified as G
+import Data.Binary.Put qualified as P
+import Data.ByteString.Internal qualified as I
+import Data.ByteString.Lazy qualified as L
+import Data.List
+import Data.Word
+
+type Reg = (Word8, Word32)
+
 data Huffman where
   Folha :: Int -> Char -> Huffman
   No :: Int -> Huffman -> Huffman -> Huffman
@@ -14,17 +23,16 @@ instance Ord Huffman where
   a <= b = pegaNumero a <= pegaNumero b
 
 
+ordena :: (Ord a) => [a] -> [a]
+ordena [] = []
+ordena [x] = [x]
+ordena l@(x : xs) = ordena (filter (< x) xs) ++ filter (== x) l ++ ordena (filter (> x) xs)
 
-sort :: (Ord a) => [a] -> [a]
-sort [] = []
-sort [x] = [x]
-sort l@(x : xs) = sort (filter (< x) xs) ++ filter (== x) l ++ sort (filter (> x) xs)
-
-insert :: (Ord a) => a -> [a] -> [a]
-insert a [] = [a]
-insert a l@(x:xs)
-    | a <= x = a : l
-    | otherwise = x : insert a xs
+insere :: (Ord a) => a -> [a] -> [a]
+insere a [] = [a]
+insere a l@(x : xs)
+  | a <= x = a : l
+  | otherwise = x : insere a xs
 
 count :: (Eq a) => a -> [a] -> Int
 count x = length . filter (x ==)
@@ -40,7 +48,7 @@ pegaNumero (No i l r) = i
 construirArvore :: [Huffman] -> Huffman
 construirArvore [] = error "Arvore Vazia"
 construirArvore [x] = x
-construirArvore (x : y : xs) = construirArvore $  insert (No (pegaNumero x + pegaNumero y) x y) xs
+construirArvore (x : y : xs) = construirArvore $ insere (No (pegaNumero x + pegaNumero y) x y) xs
 
 codHuffmanAux :: String -> Huffman -> [(Char, String)]
 codHuffmanAux s (No i l r) = codHuffmanAux (s ++ "0") l ++ codHuffmanAux (s ++ "1") r
@@ -49,27 +57,49 @@ codHuffmanAux s (Folha i c) = [(c, s)]
 codHuffman :: Huffman -> [(Char, String)]
 codHuffman = codHuffmanAux ""
 
-
 codificarAux :: String -> [(Char, String)] -> [String]
 codificarAux [] _ = []
-codificarAux s@(x:xs) huffmanCode = map snd (filter ((x ==) . fst) huffmanCode) ++ codificarAux xs huffmanCode
+codificarAux s@(x : xs) huffmanCode = map snd (filter ((x ==) . fst) huffmanCode) ++ codificarAux xs huffmanCode
 
 codificar :: String -> Huffman -> String
 codificar "" _ = ""
-codificar s@(x:xs) h = concat $ codificarAux s $ codHuffman h
+codificar s@(x : xs) h = concat $ codificarAux s $ codHuffman h
 
 decodificarCaractere :: String -> Huffman -> (Char, String)
 decodificarCaractere s (Folha i c) = (c, s)
-decodificarCaractere s@(x:xs) h@(No i l r)
-    |x == '0' = decodificarCaractere xs l
-    |x == '1' = decodificarCaractere xs r
+decodificarCaractere s@(x : xs) h@(No i l r)
+  | x == '0' = decodificarCaractere xs l
+  | x == '1' = decodificarCaractere xs r
 
 decodificar :: String -> Huffman -> String
 decodificar [] _ = []
-decodificar s@(x:xs) h@(No i l r) = caractere : decodificar resto h where (caractere, resto) = decodificarCaractere s (No i l r)
+decodificar s@(x : xs) h@(No i l r) = caractere : decodificar resto h where (caractere, resto) = decodificarCaractere s (No i l r)
 
 arvore :: String -> Huffman
-arvore s = construirArvore $ sort $ freqSimb $ s
+arvore s = construirArvore $ ordena $ freqSimb $ s
 
 codificaTotal :: String -> String
 codificaTotal s = codificar s $ arvore s
+
+
+freq :: (Eq a) => [a] -> [(a, Int)]
+freq [] = []
+freq (x : xs) = let (l1, l2) = partition (== x) xs in (x, length l1 + 1) : freq l2
+
+
+put :: [(Char, Int)] -> P.Put
+put [] = P.flush
+put ((c, f) : xs) = 
+  do
+    P.putWord8 $ I.c2w c
+    P.putWord32be $ toEnum f
+    put xs
+
+escrita :: IO ()
+escrita =
+  do
+    txt <- readFile "file.txt"
+    let xs = freq txt
+    let bs = P.runPut $ put xs
+    putStrLn $ show xs
+    L.writeFile "resultado.bin" bs
