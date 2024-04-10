@@ -1,5 +1,6 @@
 {-# LANGUAGE GADTSyntax #-}
 
+import Data.Bits
 import Data.Binary.Get qualified as G
 import Data.Binary.Put qualified as P
 import Data.ByteString.Internal qualified as I
@@ -21,7 +22,6 @@ instance Eq Huffman where
 instance Ord Huffman where
   (<=) :: Huffman -> Huffman -> Bool
   a <= b = pegaNumero a <= pegaNumero b
-
 
 ordena :: (Ord a) => [a] -> [a]
 ordena [] = []
@@ -81,15 +81,13 @@ arvore s = construirArvore $ ordena $ freqSimb $ s
 codificaTotal :: String -> String
 codificaTotal s = codificar s $ arvore s
 
-
 freq :: (Eq a) => [a] -> [(a, Int)]
 freq [] = []
 freq (x : xs) = let (l1, l2) = partition (== x) xs in (x, length l1 + 1) : freq l2
 
-
 put :: [(Char, Int)] -> P.Put
 put [] = P.flush
-put ((c, f) : xs) = 
+put ((c, f) : xs) =
   do
     P.putWord8 $ I.c2w c
     P.putWord32be $ toEnum f
@@ -102,4 +100,36 @@ escrita =
     let xs = freq txt
     let bs = P.runPut $ put xs
     putStrLn $ show xs
-    L.writeFile "resultado.bin" bs
+    L.writeFile "file.bin" bs
+
+getReg :: G.Get (Word8, Word32)
+getReg =
+  do
+    c <- G.getWord8
+    f <- G.getWord32be
+    return (c, f)
+
+getRegs :: G.Get [Reg] -- argumento da funcao propagado pelo pipeline da monada
+getRegs =
+  do
+    empty <- G.isEmpty
+    if empty
+      then return []
+      else do r <- getReg; rs <- getRegs; return (r : rs)
+
+printRegs :: [Reg] -> IO ()
+printRegs [] = return ()
+printRegs ((c, f) : rs) =
+  do
+    putStrLn $ show (I.w2c c) ++ "-" ++ show f
+    printRegs rs
+
+leitura :: IO ()
+leitura =
+  do
+    bs <- L.readFile "file.bin"
+    let rs = G.runGet getRegs bs
+    printRegs rs
+
+-- s2b :: String -> Word8 -- assumindo que a String tem tamanho 8
+-- s2b (x : xs) = 
