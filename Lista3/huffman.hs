@@ -73,7 +73,7 @@ decodificarCaractere s@(x : xs) h@(No i l r)
 
 decodificar :: String -> Huffman -> String
 decodificar [] _ = []
-decodificar s@(x : xs) h@(No i l r) = caractere : decodificar resto h where (caractere, resto) = decodificarCaractere s (No i l r)
+decodificar s@(x : xs) h@(No i l r) =  let (caractere, resto) = decodificarCaractere s (No i l r) in caractere : decodificar resto h
 
 arvore :: String -> Huffman
 arvore s = construirArvore $ ordena $ freqSimb $ s
