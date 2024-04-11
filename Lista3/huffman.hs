@@ -131,4 +131,19 @@ leitura =
     let rs = G.runGet getRegs bs
     printRegs rs
 
+-- binStringToInteger :: String -> Integer
+-- binStringToInteger n = binStringToIntegerAux n (length n - 1)
+
+-- binStringToIntegerAux :: String -> Int -> Integer
+-- binStringToIntegerAux "" len = 0
+-- binStringToIntegerAux "1" len = 1
+-- binStringToIntegerAux "0" len = 0
+-- binStringToIntegerAux ('0' : xs) len = 0 + binStringToIntegerAux xs (len -1)
+-- binStringToIntegerAux ('1' : xs) len = (2^len) + binStringToIntegerAux xs (len-1)
+-- binStringToIntegerAux _ len = error "Illegal character"
+
+
+
+
 -- s2b :: String -> Word8 
+-- s2b string = fromInteger $ binStringToInteger string
