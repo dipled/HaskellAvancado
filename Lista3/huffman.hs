@@ -131,5 +131,4 @@ leitura =
     let rs = G.runGet getRegs bs
     printRegs rs
 
--- s2b :: String -> Word8 -- assumindo que a String tem tamanho 8
--- s2b (x : xs) = 
+-- s2b :: String -> Word8 
