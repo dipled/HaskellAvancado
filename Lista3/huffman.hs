@@ -69,7 +69,6 @@ decodificar :: String -> Huffman -> String
 decodificar [] _ = []
 decodificar s@(x : xs) h@(No i l r) = let (caractere, resto) = go s (No i l r) in caractere : decodificar resto h
   where
-    go "" _ = error "Algo deu errado"
     go s (Folha i c) = (c, s)
     go s@(x : xs) h@(No i l r)
       | x == '0' = go xs l
