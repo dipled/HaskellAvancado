@@ -1,8 +1,8 @@
 {-# LANGUAGE GADTSyntax #-}
-import Data.Bits
 
 import Data.Binary.Get qualified as G
 import Data.Binary.Put qualified as P
+import Data.Bits
 import Data.ByteString.Internal qualified as I
 import Data.ByteString.Lazy qualified as L
 import Data.List
@@ -38,9 +38,9 @@ count :: (Eq a) => a -> [a] -> Int
 count x = length . filter (x ==)
 
 freqSimb :: String -> [Huffman]
-freqSimb s = ordena $ go s 
-  where 
-    go [] = [] 
+freqSimb s = ordena $ go s
+  where
+    go [] = []
     go s@(x : xs) = Folha (count x s) x : go (filter (x /=) xs)
 
 pegaNumero :: Huffman -> Int
@@ -52,13 +52,11 @@ construirArvore [] = error "Arvore Vazia"
 construirArvore [x] = x
 construirArvore (x : y : xs) = construirArvore $ insere (No (pegaNumero x + pegaNumero y) x y) xs
 
-
 codHuffman :: Huffman -> [(Char, String)]
 codHuffman = go ""
   where
     go s (No i l r) = go (s ++ "0") l ++ go (s ++ "1") r
     go s (Folha i c) = [(c, s)]
-
 
 codificar :: String -> Huffman -> String
 codificar "" _ = ""
@@ -69,20 +67,20 @@ codificar s@(x : xs) h = concat $ go s $ codHuffman h
 
 decodificar :: String -> Huffman -> String
 decodificar [] _ = []
-decodificar s@(x : xs) h@(No i l r) =  let (caractere, resto) = go s (No i l r) in caractere : decodificar resto h
-  where 
+decodificar s@(x : xs) h@(No i l r) = let (caractere, resto) = go s (No i l r) in caractere : decodificar resto h
+  where
+    go "" _ = error "Algo deu errado"
     go s (Folha i c) = (c, s)
     go s@(x : xs) h@(No i l r)
       | x == '0' = go xs l
       | x == '1' = go xs r
-
 
 freq :: (Eq a) => [a] -> [(a, Int)]
 freq [] = []
 freq (x : xs) = let (l1, l2) = partition (== x) xs in (x, length l1 + 1) : freq l2
 
 putStart :: (Int, Int) -> P.Put
-putStart (n, t) = 
+putStart (n, t) =
   do
     P.putWord8 $ toEnum n
     P.putWord32be $ toEnum t
@@ -96,23 +94,22 @@ putFreqList ((c, f) : xs) =
     P.putWord32be $ toEnum f
     putFreqList xs
 
-
-s2b :: String -> Word8 
+s2b :: String -> Word8
 s2b string = toEnum $ go string
-  where 
+  where
     go n = goAux n (length n - 1)
       where
         goAux "" len = 0
         goAux "1" len = 1
         goAux "0" len = 0
-        goAux ('0' : xs) len = 0 + goAux xs (len -1)
-        goAux ('1' : xs) len = (2^len) + goAux xs (len-1)
+        goAux ('0' : xs) len = 0 + goAux xs (len - 1)
+        goAux ('1' : xs) len = (2 ^ len) + goAux xs (len - 1)
         goAux _ len = error "Illegal character"
 
 b2s :: Word8 -> [Char]
-b2s n = go n --if (length $ go n) >= 8 then go n else (completaZeros $ 8 - (length $ go n)) $ go n
+b2s n = if (length $ go n) >= 8 then go n else (completaZeros $ 8 - (length $ go n)) $ go n
   where
-    go n 
+    go n
       | mod n 2 == 0 = if n /= 0 then (go $ div n 2) ++ "0" else ""
       | otherwise = (go $ div n 2) ++ "1"
 
@@ -123,10 +120,9 @@ completaZeros n s = '0' : completaZeros (n - 1) s
 putFullTxt :: String -> P.Put
 putFullTxt [] = P.flush
 putFullTxt s =
-  do 
+  do
     P.putWord8 $ s2b $ take 8 s
     putFullTxt $ drop 8 s
-
 
 -- escrita :: IO ()
 -- escrita =
@@ -135,8 +131,7 @@ putFullTxt s =
 --     let xs = freq txt
 --     let bs = P.runPut $ putFreqList xs
 --     putStrLn $ show xs
---     L.writeFile "file.bin" $  bs 
-
+--     L.writeFile "file.bin" $  bs
 
 getReg :: G.Get Reg
 getReg =
@@ -153,8 +148,6 @@ getRegs =
       then return []
       else do r <- getReg; rs <- getRegs; return (r : rs)
 
-
-
 printRegs :: [Reg] -> IO ()
 printRegs [] = return ()
 printRegs ((c, f) : rs) =
@@ -163,14 +156,12 @@ printRegs ((c, f) : rs) =
     printRegs rs
 
 printStart :: Reg -> IO ()
-printStart (n, t) = 
+printStart (n, t) =
   do
     putStrLn $ show n ++ " - " ++ show t
 
-
 getC :: G.Get Word8
 getC = G.getWord8 >>= \x -> return x
-      
 
 getMsg :: G.Get [Word8] -- argumento da funcao propagado pelo pipeline da monada
 getMsg =
@@ -214,16 +205,14 @@ escrita =
     putStrLn $ show xs
     L.writeFile "file.bin" $ bs1 <> bs <> bs2
 
-
-
 leitura :: IO ()
 leitura =
   do
     bs <- L.readFile "file.bin"
     let regHead@(n, t) = G.runGet getReg bs
-    let regTail = G.runGet getRegs $  L.take ((read $ show n) * 5) $ L.drop 5 bs
+    let regTail = G.runGet getRegs $ L.take ((read $ show n) * 5) $ L.drop 5 bs
     let msg = G.runGet getMsg $ L.drop ((read $ show n) * 5 + 5) bs
-    printStart regHead 
+    printStart regHead
     printRegs regTail
     let fr = reg2LeafList regTail
     print msg
@@ -231,9 +220,10 @@ leitura =
     let msgDecodificada = decodificar binMsg $ construirArvore fr
     print binMsg
     print fr
+    print $ codHuffman $ construirArvore fr
     print msgDecodificada
 
-passoAPasso :: IO () = 
+passoAPasso :: IO () =
   do
     putStrLn "Digite uma String"
     ln <- getLine
