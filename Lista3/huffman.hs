@@ -192,7 +192,7 @@ leitura =
     let msgDecodificada = decodificar binMsg $ construirArvore fr
     -- print t
     -- print $ length binMsg' - fromEnum t
-    print msgDecodificada
+    writeFile "out.txt" msgDecodificada
 
 passoAPasso :: IO () =
   do
