@@ -28,11 +28,6 @@ ordena [] = []
 ordena [x] = [x]
 ordena l@(x : xs) = ordena (filter (< x) xs) ++ filter (== x) l ++ ordena (filter (> x) xs)
 
-insere :: (Ord a) => a -> [a] -> [a]
-insere a [] = [a]
-insere a l@(x : xs)
-  | a <= x = a : l
-  | otherwise = x : insere a xs
 
 count :: (Eq a) => a -> [a] -> Int
 count x = length . filter (x ==)
@@ -51,6 +46,11 @@ construirArvore :: [Huffman] -> Huffman
 construirArvore [] = error "Arvore Vazia"
 construirArvore [x] = x
 construirArvore (x : y : xs) = construirArvore $ insere (No (pegaNumero x + pegaNumero y) x y) xs
+  where
+    insere a [] = [a]
+    insere a l@(x : xs)
+      | a <= x = a : l
+      | otherwise = x : insere a xs
 
 codHuffman :: Huffman -> [(Char, String)]
 codHuffman = go ""
@@ -65,11 +65,30 @@ codificar s@(x : xs) h = concat $ go s $ codHuffman h
     go [] _ = []
     go s@(x : xs) huffmanCode = map snd (filter ((x ==) . fst) huffmanCode) ++ go xs huffmanCode
 
+-- decodificar :: String -> Huffman -> Maybe String
+-- decodificar [] _ = Just []
+-- decodificar s@(x : xs) h@(No i l r) = 
+--   case decodificar resto h of
+--     Just a -> Just (caractere : resultado)
+--     Nothing -> Nothing
+--   where
+--     Just resultado = decodificar resto h
+--     (caractere, resto) = go s h
+--     go s (Folha i c) = (c, s)
+--     go "" _ = error ""
+--     go s@(x : xs) h@(No i l r)
+--       | x == '0' = go xs l
+--       | x == '1' = go xs r
+
 decodificar :: String -> Huffman -> String
-decodificar [] _ = []
-decodificar s@(x : xs) h@(No i l r) = let (caractere, resto) = go s (No i l r) in caractere : decodificar resto h
+decodificar "" _ = ""
+decodificar s@(x : xs) h@(No i l r) = 
+  case go s h of
+    Just (caractere, resto) -> (caractere : decodificar resto h)
+    Nothing -> if length s >= 8 then error "Input inválido" else decodificar ("0" ++ s) h
   where
-    go s (Folha i c) = (c, s)
+    go s (Folha i c) = Just (c, s)
+    go "" _ = Nothing
     go s@(x : xs) h@(No i l r)
       | x == '0' = go xs l
       | x == '1' = go xs r
@@ -93,8 +112,8 @@ putFreqList ((c, f) : xs) =
     P.putWord32be $ toEnum f
     putFreqList xs
 
-s2b :: String -> Word8
-s2b string = toEnum $ go string
+s2w :: String -> Word8
+s2w string = toEnum $ go string
   where
     go n = goAux n (length n - 1)
       where
@@ -105,22 +124,28 @@ s2b string = toEnum $ go string
         goAux ('1' : xs) len = (2 ^ len) + goAux xs (len - 1)
         goAux _ len = error "Illegal character"
 
-b2s :: Word8 -> [Char]
-b2s n = if (length $ go n) >= 8 then go n else (completaZeros $ 8 - (length $ go n)) $ go n
-  where
-    go n
-      | mod n 2 == 0 = if n /= 0 then (go $ div n 2) ++ "0" else ""
-      | otherwise = (go $ div n 2) ++ "1"
+w2s :: Word8 -> String
+w2s n
+  | mod n 2 == 0 = if n /= 0 then (w2s $ div n 2) ++ "0" else ""
+  | otherwise = (w2s $ div n 2) ++ "1"
 
-completaZeros :: Int -> String -> String
-completaZeros 0 s = s
-completaZeros n s = '0' : completaZeros (n - 1) s
+wList2s :: [Word8] -> String
+wList2s [] = ""
+wList2s [x] = w2s x
+wList2s (x : xs) = go x ++ wList2s xs
+  where 
+    go :: Word8 -> String
+    go n = if (length $ w2s n) >= 8 then w2s n else (completaZeros $ 8 - (length $ w2s n)) $ w2s n 
+      where 
+        completaZeros :: Int -> String -> String
+        completaZeros 0 s = s
+        completaZeros n s = '0' : completaZeros (n - 1) s
 
 putFullTxt :: String -> P.Put
 putFullTxt [] = P.flush
 putFullTxt s =
   do
-    P.putWord8 $ s2b $ take 8 s
+    P.putWord8 $ s2w $ take 8 s
     putFullTxt $ drop 8 s
 
 -- escrita :: IO ()
@@ -204,18 +229,19 @@ escrita =
     putStrLn $ show xs
     L.writeFile "file.bin" $ bs1 <> bs <> bs2
 
+
 leitura :: IO ()
 leitura =
   do
     bs <- L.readFile "file.bin"
     let regHead@(n, t) = G.runGet getReg bs
     let regTail = G.runGet getRegs $ L.take ((read $ show n) * 5) $ L.drop 5 bs
-    let msg = G.runGet getMsg $ L.drop ((read $ show n) * 5 + 5) bs
+    let msg = G.runGet getMsg $  L.drop ((read $ show n) * 5 + 5) bs
     printStart regHead
     printRegs regTail
     let fr = reg2LeafList regTail
     print msg
-    let binMsg = concat $ map b2s msg
+    let binMsg = wList2s msg
     let msgDecodificada = decodificar binMsg $ construirArvore fr
     print binMsg
     print fr
@@ -237,7 +263,11 @@ passoAPasso :: IO () =
     putStrLn ""
     let final = codificar ln tr
     print $ "codificado: " ++ final
-    print $ s2b $ take 8 final
+    print $ getBytes final
     putStrLn ""
     putStrLn ""
     print $ "decodificado: " ++ decodificar final tr
+
+getBytes :: String -> [Word8]
+getBytes "" = []
+getBytes s = (s2w $ take 8 s) : (getBytes $ drop 8 s)
