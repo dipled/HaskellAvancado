@@ -22,6 +22,6 @@ instance Applicative Arvore where
     _ <*> Folha = Folha
     (No f l r) <*> (No a l' r') = (No (f a) (l <*> l') (r <*> r'))
 
-instance Monad Arvore where
-    (>>=) :: Arvore a -> (a -> Arvore b) -> Arvore b
-    Folha 
+-- instance Monad Arvore where
+--     (>>=) :: Arvore a -> (a -> Arvore b) -> Arvore b
+--     Folha 
