@@ -4,8 +4,8 @@
 
 ### Conteúdo Programático
 - [x] [Tipos de dados algébricos](DadosAlgebricos.hs).
-- [ ] Classes de tipos.
-- [ ] Functores (classes Functor e Applicative).
+- [x] Classes de tipos.
+- [x] Functores (classes Functor e Applicative).
 - [ ] Mônadas.
 - [ ] Módulos.
 - [ ] Gerenciador de pacotes (Cabal).
