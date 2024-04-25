@@ -63,21 +63,21 @@ instance Monad Log where
 log' :: String -> Log ()
 log' s = ML (s <> "\n", ())
 
-instance Functor Arvore where
-    fmap :: (a -> b) -> Arvore a -> Arvore b
-    fmap f Folha = Folha
-    fmap f (No a l r) = No (f a) (fmap f l) $ fmap f r
+-- instance Functor Arvore where
+--     fmap :: (a -> b) -> Arvore a -> Arvore b
+--     fmap f Folha = Folha
+--     fmap f (No a l r) = No (f a) (fmap f l) $ fmap f r
 
-instance Applicative Arvore where
-    pure :: a -> Arvore a
-    pure x = No x Folha Folha
+-- instance Applicative Arvore where
+--     pure :: a -> Arvore a
+--     pure x = No x Folha Folha
 
-    (<*>) :: Arvore (a -> b) -> Arvore a -> Arvore b
-    Folha <*> _ = Folha
-    _ <*> Folha = Folha
-    (No f l r) <*> (No a l' r') = (No (f a) (l <*> l') $ r <*> r')
+--     (<*>) :: Arvore (a -> b) -> Arvore a -> Arvore b
+--     Folha <*> _ = Folha
+--     _ <*> Folha = Folha
+--     (No f l r) <*> (No a l' r') = (No (f a) (l <*> l') $ r <*> r')
 
-instance Monad Arvore where
-    (>>=) :: Arvore a -> (a -> Arvore b) -> Arvore b
-    Folha >>= f = Folha
-    (No a l r) >>= f = (let (No b l' r') = f a in (No b (l >>= f) $ r >>= f))
+-- instance Monad Arvore where
+--     (>>=) :: Arvore a -> (a -> Arvore b) -> Arvore b
+--     Folha >>= f = Folha
+--     (No a l r) >>= f = (let (No b l' r') = f a in (No b (l >>= f) $ r >>= f))
