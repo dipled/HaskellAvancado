@@ -6,7 +6,7 @@
 - [x] [Tipos de dados algébricos](DadosAlgebricos.hs).
 - [x] [Classes de tipos](TypeClasses.hs).
 - [x] [Functores(classes Functor e Applicative)](Monada.hs).
-- [ ] [Mônadas](Monada.hs).
+- [x] [Mônadas](Monada.hs).
 - [ ] Módulos.
 - [ ] Gerenciador de pacotes (Cabal).
 - [ ] Testes (QuickCheck).
