@@ -35,49 +35,71 @@ eval (Div a b) = do eval a >>= \x -> eval b >>= \y -> if y /= 0
                                                 else Nothing
 {- 
  Monoide: Operação binária associativa com elemento neutro 
-          ∀a,b,c(a.(b.c) = (a.b).c)
-          ∃a∀e(a.e = a = e.a)
+          ∀a, b, c (a . (b . c) = (a . b) . c)
+          ∃a ∀e(a . e = a = e . a)
  Mônada: 
           return a >>= λb.n = n[a/b]
           m >>= λa.return a = m
           m >>= (λa.n >>= λb.o)= (m >>= λa.n) >>= λb.o
 -}
 
-data Log a = ML (String, a) deriving Show
+data Log a = MLog (String, a) deriving Show
 
 instance Functor Log where
     fmap :: (a -> b) -> Log a -> Log b
-    fmap f (ML (s, x)) = ML (s, f x)
+    fmap f (MLog (s, x)) = MLog (s, f x)
 
 instance Applicative Log where
     (<*>) :: Log (a -> b) -> Log a -> Log b
-    ML (s, f) <*> ML (s', a) = ML (s <> s', f a)
+    MLog (s, f) <*> MLog (s', a) = MLog (s <> s', f a)
 
     pure :: a -> Log a
-    pure a = ML ("", a)
+    pure a = MLog ("", a)
 
 instance Monad Log where
     (>>=) ::  Log a -> (a -> Log b) -> Log b
-    ML (s, a) >>= f = let ML (s', b) = f a in ML (s <> s', b)
+    MLog (s, a) >>= f = let MLog (s', b) = f a in MLog (s <> s', b)
 
 log' :: String -> Log ()
-log' s = ML (s <> "\n", ())
+log' s = MLog (s <> "\n", ())
 
--- instance Functor Arvore where
---     fmap :: (a -> b) -> Arvore a -> Arvore b
---     fmap f Folha = Folha
---     fmap f (No a l r) = No (f a) (fmap f l) $ fmap f r
+{- State Monad -}
 
--- instance Applicative Arvore where
---     pure :: a -> Arvore a
---     pure x = No x Folha Folha
+type Estado = Int
+data SM a where
+    MS :: (Estado -> (a, Estado)) -> SM a 
 
---     (<*>) :: Arvore (a -> b) -> Arvore a -> Arvore b
---     Folha <*> _ = Folha
---     _ <*> Folha = Folha
---     (No f l r) <*> (No a l' r') = (No (f a) (l <*> l') $ r <*> r')
 
--- instance Monad Arvore where
---     (>>=) :: Arvore a -> (a -> Arvore b) -> Arvore b
---     Folha >>= f = Folha
---     (No a l r) >>= f = (let (No b l' r') = f a in (No b (l >>= f) $ r >>= f))
+instance Functor SM where
+    fmap :: (a -> b) -> SM a -> SM b
+    fmap f (MS m) = MS (\e -> let (a, e') = m e in (f a, e'))
+
+instance Applicative SM where
+    pure :: a -> SM a
+    pure x = MS (\e -> (x, e))
+
+    (<*>) :: SM (a -> b) -> SM a -> SM b
+    MS f <*> MS x = MS (\e -> let (f', e') = f e; (a, e'') = x e' in (f' a, e''))
+
+instance Monad SM where
+    (>>=) :: SM a -> (a -> SM b) -> SM b
+    MS m >>= f = MS (\e -> let (a, e') = m e; MS fa = f a in fa e')
+
+contador = MS (\x -> ((), x + 1))
+
+{- mdc sem Mônada de Estado -}
+mdc' :: (Num a, Ord a) => a -> a -> a
+mdc' a b 
+    | a == b = a
+    | a > b = mdc' (a - b) b
+    | otherwise = mdc' a (b - a)
+
+{- mdc com Mônada de Estado -}
+mdc :: (Num a, Ord a) => a -> a -> SM a
+mdc a b 
+    | a == b = do contador; return a
+    | a > b = do contador; mdc (a - b) b
+    | otherwise = do contador ; mdc a (b - a)
+
+runMS :: SM a -> (a, Estado)
+runMS (MS m) = m 0
