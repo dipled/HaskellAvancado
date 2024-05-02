@@ -90,15 +90,15 @@ instance Eval Term Res where
   eval (TB t) = RB (eval t)
   eval (TI t) = RI (eval t)
 
-data Temperature  where
-   C :: Float -> Temperature  
-   F :: Float -> Temperature
-    deriving(Show)
+data Temperature where
+  C :: Float -> Temperature
+  F :: Float -> Temperature
+ deriving(Show)
 
 instance Eq Temperature where
-    (==) (C n) (C m) = n == m
-    (==) (F n) (F m) = n == m
-    (==) (F n) (C m) = (1.8*m + 32) == n
-    (==) (C n) (F m) = (1.8*n + 32) == m
+  (==) (C n) (C m) = n == m
+  (==) (F n) (F m) = n == m
+  (==) (F n) (C m) = (1.8*m + 32) == n
+  (==) (C n) (F m) = (1.8*n + 32) == m
 
 
