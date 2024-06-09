@@ -10,7 +10,7 @@
 - [ ] Módulos.
 - [ ] Gerenciador de pacotes (Cabal).
 - [ ] Testes (QuickCheck).
-- [ ] Cálculo Lâmbda.
-- [ ] Cálculo Lâmbda simplesmente tipado.
-- [ ] Avaliação estrita e preguiçosa.
+- [x] Cálculo Lâmbda.
+- [x] Cálculo Lâmbda simplesmente tipado.
+- [x] Avaliação estrita e preguiçosa.
 - [ ] Transformadores de mônadas.
