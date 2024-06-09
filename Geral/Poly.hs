@@ -1,4 +1,3 @@
-import qualified GHC.TypeLits as tipo
 -- Polimorfismo universal ou paramétrico
 -- o tipo de len' poderia ser escrito como ∀a, [a] -> Int
 len' :: [a] -> Int
