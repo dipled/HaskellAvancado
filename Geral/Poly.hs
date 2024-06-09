@@ -1,14 +1,45 @@
---Polimorfismo universal ou universal
-
+import qualified GHC.TypeLits as tipo
+-- Polimorfismo universal ou paramétrico
+-- o tipo de len' poderia ser escrito como ∀a, [a] -> Int
 len' :: [a] -> Int
 len' [] = 0
 len' (x:xs) = 1 + len' xs 
 
---Polimorfismo com restrições
+-- Polimorfismo com restrições
+-- Essas constraints sãos estabelecidas com classes de tipo, mas
+-- poderíamos reescrever o tipo de somatorio como
+-- ∀a, Num a -> [a] -> a, i.e, como se fosse uma implicação
 
 somatorio :: Num a => [a] -> a
 somatorio [] = 0
 somatorio (x:xs) = x + somatorio xs
+
+{- Polimorfismo Ad-Hoc ou Polimorfismo de sobrecarga:
+    Em haskell, é implementado através das classes de tipo,
+    como mostrado a seguir
+-}
+
+data Temperature where
+  C :: Float -> Temperature
+  F :: Float -> Temperature
+ deriving(Show)
+
+instance Eq Temperature where
+  (==) (C n) (C m) = n == m
+  (==) (F n) (F m) = n == m
+  (==) (F n) (C m) = (1.8*m + 32) == n
+  (==) (C n) (F m) = (1.8*n + 32) == m
+
+{- Note que a função (==) foi implementada para o tipo
+    Temperature, de forma a instanciá-lo como pertencente a
+    classe Eq. Assim, sobrecarregamos a função (==) para esse tipo.
+    Com isso, toda função que possuir um constraint do tipo Eq a poderá
+    receber um dado do tipo Temperature como argumento.
+
+-}
+
+
+
 
 
 data Arvore a = Folha | No a (Arvore a) (Arvore a)
