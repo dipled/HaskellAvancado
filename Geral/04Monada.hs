@@ -79,11 +79,11 @@ instance Applicative SM where
     pure x = MS (\e -> (x, e))
 
     (<*>) :: SM (a -> b) -> SM a -> SM b
-    MS f <*> MS x = MS (\e -> let (f', e') = f e in let (a, e'') = x e' in (f' a, e''))
+    MS f <*> MS x = MS (\e -> let (f', e') = f e; (a, e'') = x e' in (f' a, e''))
 
 instance Monad SM where
     (>>=) :: SM a -> (a -> SM b) -> SM b
-    MS m >>= f = MS (\e -> let (a, e') = m e in let MS fa = f a in fa e')
+    MS m >>= f = MS (\e -> let (a, e') = m e ; MS fa = f a in fa e')
 
 contador = MS (\x -> ((), x + 1))
 
