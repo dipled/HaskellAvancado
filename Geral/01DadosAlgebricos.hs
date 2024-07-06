@@ -102,14 +102,15 @@ inOrder (No a e d) = inOrder e ++ [a] ++ inOrder d
 --   | evalB b = t1
 --   | otherwise = t2
 
+-- data Term a = Lit Int | LitB Bool | Succ (Term Int) | IsZero (Term Int) | If (Term Bool) (Term a) (Term a)
 
 -- Exemplos de GADTs
 
 data Term a where
   Lit :: Int -> Term Int
-  LitB :: Bool -> Term Bool 
-  Succ :: Term Int -> Term Int
-  IsZero :: Term Int -> Term Bool
+  LitB :: Bool -> Term Bool         -- Desse modo, é possível especificar o tipo de retorno dos construtores.
+  Succ :: Term Int -> Term Int      -- Caso não definíssimos utilizando GADTs, o retorno de todo construtor seria
+  IsZero :: Term Int -> Term Bool    -- "Term a", portanto, não seria possível definir a função "eval".
   If :: Term Bool -> Term a -> Term a -> Term a
   
 deriving instance Show a => Show (Term a)
